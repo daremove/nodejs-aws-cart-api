@@ -1,10 +1,37 @@
 # nodejs-aws-cart-api
 
+NestJS cart service backed by PostgreSQL (RDS) and exposed via API Gateway + Lambda.
+The CDK definitions for the database, the Lambda function, and the API Gateway live in the
+[sibling `shop-react-redux-cloudfront-be`](../shop-react-redux-cloudfront-be) project
+(`lib/cart-database-stack.ts`, `lib/cart-service-stack.ts`).
+
 ## Installation
 
 ```bash
 npm install
 ```
+
+## Environment
+
+Copy `env.example` to `.env` and adjust the `DB_*` values to point at your local Postgres
+(or the RDS endpoint produced by the CDK stack). For a quick local Postgres:
+
+```bash
+docker run --name cart-pg -e POSTGRES_USER=cartapi -e POSTGRES_PASSWORD=cartapi \
+  -e POSTGRES_DB=cartdb -p 5432:5432 -d postgres:16
+```
+
+With `DB_SYNCHRONIZE=true`, TypeORM creates the `carts` and `cart_items` tables on first run.
+
+## Deploy to AWS (via CDK)
+
+```bash
+cd ../shop-react-redux-cloudfront-be
+npx cdk deploy CartDatabaseStack CartServiceStack --require-approval never
+```
+
+The `CartServiceStack` output `CartServiceApiUrl` is the API Gateway endpoint to plug into
+the frontend's `VITE_CART_API_PREFIX`.
 
 
 

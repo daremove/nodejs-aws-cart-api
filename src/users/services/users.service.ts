@@ -1,6 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import { User } from '../models';
+
+const deterministicUserId = (name: string): string => {
+  const hash = createHash('sha256').update(name).digest('hex');
+  return [
+    hash.slice(0, 8),
+    hash.slice(8, 12),
+    hash.slice(12, 16),
+    hash.slice(16, 20),
+    hash.slice(20, 32),
+  ].join('-');
+};
 
 @Injectable()
 export class UsersService {
@@ -20,7 +31,7 @@ export class UsersService {
   }
 
   createOne({ name, password }: User): User {
-    const id = randomUUID();
+    const id = deterministicUserId(name);
     const newUser = { id, name, password };
 
     this.users[id] = newUser;
